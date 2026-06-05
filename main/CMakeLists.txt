@@ -1,4 +1,4 @@
-idf_component_register(SRCS "hello_world_main.c"
+idf_component_register(SRCS "desktop_robot_main.c"
                             "robot_display.c"
                             "robot_motor.c"
                             "robot_web.c"
