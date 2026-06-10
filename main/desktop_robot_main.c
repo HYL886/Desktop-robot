@@ -44,16 +44,22 @@ static void robot_loop_task(void *pv_parameters)
 
     int64_t last_random_tick_ms = 0;
     int64_t last_status_ms = 0;
+    robot_random_mode_t last_mode = (robot_random_mode_t)-1;
 
     while (1) {
         const int64_t now_ms = esp_timer_get_time() / 1000;
+        const robot_random_mode_t mode = robot_web_get_random_mode();
+
+        if (mode != last_mode) {
+            robot_display_set_random_mode(mode);
+            last_mode = mode;
+        }
 
         robot_display_update_eyes();
 
         if (!robot_web_manual_active() && now_ms - last_random_tick_ms > 40) {
             last_random_tick_ms = now_ms;
 
-            const robot_random_mode_t mode = robot_web_get_random_mode();
             if (mode == ROBOT_RANDOM_SOFT) {
                 if (random_upto(120) == 1) {
                     robot_motor_random_action((uint8_t)random_upto(9), random_range(6, 18), random_range(40, 90), 1);

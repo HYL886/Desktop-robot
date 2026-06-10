@@ -506,6 +506,13 @@ static void roboeyes_open(robot_eyes_t *eyes)
     eyes->eye_r_open = true;
 }
 
+static void roboeyes_wake(robot_eyes_t *eyes)
+{
+    roboeyes_open(eyes);
+    eyes->eye_l_height_next = eyes->eye_l_height_default;
+    eyes->eye_r_height_next = eyes->eye_r_height_default;
+}
+
 static void roboeyes_blink(robot_eyes_t *eyes)
 {
     roboeyes_close(eyes);
@@ -797,6 +804,43 @@ void robot_display_show_wifi_info(const char *sta_line)
     oled_draw_text(0, 16, "AP: 192.168.4.1");
     oled_draw_text(0, 32, sta_line == NULL ? "STA: SET WIFI" : sta_line);
     (void)oled_flush();
+}
+
+void robot_display_set_random_mode(robot_random_mode_t mode)
+{
+    s_eyes.cyclops = false;
+    s_eyes.confused = false;
+    s_eyes.laugh = false;
+    s_eyes.curious = false;
+    s_eyes.h_flicker = false;
+    s_eyes.v_flicker = false;
+    s_eyes.eye_l_width_next = s_eyes.eye_l_width_default;
+    s_eyes.eye_r_width_next = s_eyes.eye_r_width_default;
+    s_eyes.space_between_next = s_eyes.space_between_default;
+
+    switch (mode) {
+    case ROBOT_RANDOM_OFF:
+        roboeyes_set_mood(&s_eyes, EYES_MOOD_TIRED);
+        roboeyes_set_position(&s_eyes, EYES_POSITION_CENTER);
+        s_eyes.idle = false;
+        s_eyes.autoblinker = false;
+        roboeyes_close(&s_eyes);
+        break;
+    case ROBOT_RANDOM_SOFT:
+        roboeyes_set_mood(&s_eyes, EYES_MOOD_HAPPY);
+        s_eyes.idle = true;
+        s_eyes.autoblinker = true;
+        roboeyes_wake(&s_eyes);
+        break;
+    case ROBOT_RANDOM_NORMAL:
+    default:
+        roboeyes_set_mood(&s_eyes, EYES_MOOD_DEFAULT);
+        s_eyes.curious = true;
+        s_eyes.idle = true;
+        s_eyes.autoblinker = true;
+        roboeyes_wake(&s_eyes);
+        break;
+    }
 }
 
 void robot_display_update_eyes(void)
